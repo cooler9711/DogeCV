@@ -52,7 +52,6 @@ public abstract class OpenCVPipeline implements CameraBridgeViewBase.CvCameraVie
         }
     }
     protected JavaCameraView cameraView;
-    protected DrawViewSource rawView;
     private ViewDisplay viewDisplay;
     protected Context context;
     private boolean initStarted = false;
@@ -88,13 +87,10 @@ public abstract class OpenCVPipeline implements CameraBridgeViewBase.CvCameraVie
             @Override
             public void run() {
                 // JCVs must be instantiated on a UI thread
-                if(isVuforia){
-                    rawView = new DrawViewSource(finalContext);
-                }else{
-                    cameraView = new CustomCameraView(finalContext, cameraIndex);
-                    cameraView.setCameraIndex(cameraIndex);
-                    cameraView.setCvCameraViewListener(self);
-                }
+
+                cameraView = new CustomCameraView(finalContext, cameraIndex);
+                cameraView.setCameraIndex(cameraIndex);
+                cameraView.setCvCameraViewListener(self);
                 inited = true;
             }
         });
@@ -112,14 +108,9 @@ public abstract class OpenCVPipeline implements CameraBridgeViewBase.CvCameraVie
         try {
             while (!inited) Thread.sleep(10);
         } catch (InterruptedException e) { return; }
+        cameraView.enableView();
+        viewDisplay.setCurrentView(context, getCameraView());
 
-        if(isVuforia){
-            viewDisplay.setCurrentView(context, rawView);
-
-        }else{
-            cameraView.enableView();
-            viewDisplay.setCurrentView(context, getCameraView());
-        }
     }
 
 
@@ -146,8 +137,6 @@ public abstract class OpenCVPipeline implements CameraBridgeViewBase.CvCameraVie
     public JavaCameraView getCameraView() {
         return cameraView;
     }
-
-    public DrawViewSource getRawView(){return rawView;}
 
     /**
      * This function is called when the camera is started; overriding this may be useful to set the
